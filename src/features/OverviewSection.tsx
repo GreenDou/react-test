@@ -1,38 +1,32 @@
-import { featureMapItems } from '../data/catalog'
 import { Badge, InfoCard, JumpCard, SectionDivider, SectionShell } from '../components/ui'
+import { featureMapItems } from '../data/catalog'
 import type { LabSectionId } from '../types'
 
 export function OverviewSection({ onJump }: { onJump: (sectionId: LabSectionId) => void }) {
   return (
     <SectionShell
-      eyebrow="完整特性地图"
-      title="最后用一张图，把 React 19 这次到底该关注什么讲清楚"
-      description="这张地图的重点不是‘列全’，而是把运行方式一起列全：哪些是纯静态 Pages 也能演的，哪些应该看代码，哪些又更适合在 SSR / 服务端框架里理解。"
-      badges={
-        <>
-          <Badge tone="demo">可直接体验</Badge>
-          <Badge tone="reference">看代码讲解</Badge>
-        </>
-      }
+      eyebrow="特性地图"
+      title="把能直接体验的、该看代码的和运行边界放在一张图里。"
+      description="这页不是单纯列功能名，而是把每个特性适合怎么理解、需要什么环境一起标出来。"
     >
       <div className="grid-two">
-        <InfoCard title="怎么读这张地图" tone="accent">
+        <InfoCard title="怎么读这张图" tone="accent">
           <ol className="ordered-list">
-            <li>先看 run mode：它告诉你当前站里是“可玩”还是“可看代码”。</li>
-            <li>再看 environment：它告诉你真正落地时需要什么宿主。</li>
-            <li>最后点进对应页面，看详细解释或 demo。</li>
+            <li>先看它是“可直接体验”还是“看代码讲解”。</li>
+            <li>再看真正落地时需要什么运行环境。</li>
+            <li>最后点进对应页面继续深入。</li>
           </ol>
         </InfoCard>
-        <InfoCard title="一眼记住的边界" tone="soft">
-          <ul className="bullet-list">
-            <li>纯客户端能力：这里就能跑。</li>
-            <li>服务端 / SSR 能力：这里给你真代码，但不伪装成在线 demo。</li>
-            <li>React 19 的价值不只是一批 hooks，而是把客户端与服务端的职责划分得更清楚。</li>
+        <InfoCard title="先记住的边界" tone="soft">
+          <ul className="bullet-list compact-list">
+            <li>纯客户端能力：这个站里就能亲手试。</li>
+            <li>服务端 / SSR 能力：这里给你真实代码，但不会假装能在线跑。</li>
+            <li>React 19 的变化不只是一组新 API，也包括客户端和服务端职责的重新划分。</li>
           </ul>
         </InfoCard>
       </div>
 
-      <SectionDivider title="特性总览" description="点击任一条都可以继续深入。" />
+      <SectionDivider title="特性总览" description="点任意一项都可以继续深入。" />
 
       <div className="map-list">
         {featureMapItems.map((item) => (

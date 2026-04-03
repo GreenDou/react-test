@@ -20,6 +20,7 @@ export function HydrationSection({ onJump }: { onJump?: (sectionId: LabSectionId
       eyebrow="代码案例 / 05"
       title="Hydration 错误改进：真正的价值在 SSR 排障，而不是在纯客户端页面里看报错"
       description="这页重点是建立判断力：哪些写法天然容易 mismatch，为什么 React 19 的错误信息改进很重要，以及为什么当前静态站不该假装自己能在线演示这件事。"
+      stackClassName="reference-stack"
       badges={
         <>
           <Badge tone="reference">含 hydrateRoot 入口</Badge>

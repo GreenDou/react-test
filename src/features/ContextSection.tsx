@@ -66,6 +66,7 @@ export function ContextSection({ onJump }: { onJump?: (sectionId: LabSectionId) 
       eyebrow="可直接体验 / 05"
       title="Context provider 简化：变化不大，但每天都更顺眼了"
       description="这类特性不该被讲成革命，它更像是 React 19 在帮你清理长期积累的语法噪音。"
+      stackClassName="feature-stack"
       badges={
         <>
           <Badge tone="demo">同一消费者对比</Badge>

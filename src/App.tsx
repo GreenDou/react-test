@@ -1,6 +1,5 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import './App.css'
-import { Badge } from './components/ui'
 import { labSections, navGroups } from './data/catalog'
 import type { LabSectionId, LabSectionMeta } from './types'
 
@@ -34,7 +33,6 @@ const HydrationSection = lazy(() =>
 )
 
 const sectionIds = new Set<LabSectionId>(labSections.map((section) => section.id))
-const topLevelMobileItems = navGroups[0]?.items ?? []
 
 function normalizeSectionId(sectionId?: string | null): LabSectionId {
   return sectionId && sectionIds.has(sectionId as LabSectionId) ? (sectionId as LabSectionId) : 'home'
@@ -133,10 +131,12 @@ function NavButton({
 
 function App() {
   const [activeSection, setActiveSection] = useState<LabSectionId>(() => readSectionFromHash())
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   useEffect(() => {
     const syncSectionFromLocation = () => {
       setActiveSection(readSectionFromHash())
+      setMobileNavOpen(false)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
@@ -149,8 +149,24 @@ function App() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!mobileNavOpen) {
+      return
+    }
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMobileNavOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeydown)
+    return () => window.removeEventListener('keydown', handleKeydown)
+  }, [mobileNavOpen])
+
   const handleSectionChange = (sectionId: LabSectionId) => {
     setActiveSection(sectionId)
+    setMobileNavOpen(false)
 
     if (typeof window === 'undefined') {
       return
@@ -179,26 +195,18 @@ function App() {
     <>
       {activeSection !== 'metadata' ? (
         <>
-          <title>{`${activeMeta.title} · React 19 导览站`}</title>
+          <title>{`${activeMeta.title} · React 19 Feature Lab`}</title>
           <meta name="description" content={activeMeta.description} />
         </>
       ) : null}
 
       <div className="app-shell">
         <aside className="sidebar-shell">
-          <div className="brand-block">
-            <p className="brand-kicker">React 19 Feature Lab</p>
-            <h2>先理解场景，再进入 API</h2>
-            <p>
-              一个面向 GitHub Pages 的 React 19 实验站：把可在线体验的能力和更适合看代码理解的能力分开整理。
-            </p>
-          </div>
-
-          <div className="sidebar-tags">
-            <Badge tone="guide">清晰导览</Badge>
-            <Badge tone="demo">在线试玩</Badge>
-            <Badge tone="reference">代码案例</Badge>
-          </div>
+          <button type="button" className="brand-block brand-link" onClick={() => handleSectionChange('home')}>
+            <p className="brand-kicker">React 19</p>
+            <h2>Feature Lab</h2>
+            <p>把可直接体验的能力、代码案例和运行边界分开整理。</p>
+          </button>
 
           <div className="sidebar-groups">
             {navGroups.map((group) => (
@@ -226,63 +234,62 @@ function App() {
           </div>
 
           <div className="sidebar-footer">
-            <span>当前查看</span>
+            <span>当前页面</span>
             <strong>{activeMeta.title}</strong>
             <p>{activeMeta.description}</p>
           </div>
         </aside>
 
         <main className="main-shell">
-          <div className="mobile-nav-shell" aria-label="Mobile navigation">
-            <div className="mobile-nav-brand card">
-              <strong>React 19 Feature Lab</strong>
-              <span>试玩与代码案例分层浏览</span>
-            </div>
-
-            <div className="mobile-nav-surface card">
-              <div className="mobile-nav-group">
-                <p>主导航</p>
-                <div className="mobile-nav-row mobile-nav-row-primary">
-                  {topLevelMobileItems.map((sectionId) => {
-                    const section = labSections.find((item) => item.id === sectionId)
-                    if (!section) return null
-                    return (
-                      <button
-                        key={section.id}
-                        type="button"
-                        className={section.id === activeSection ? 'mobile-nav-item mobile-nav-item-active' : 'mobile-nav-item'}
-                        onClick={() => handleSectionChange(section.id)}
-                      >
-                        <span>{section.icon}</span>
-                        <span>{section.shortLabel}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div className="mobile-nav-group">
-                <p>{activeGroup.title}</p>
-                <div className="mobile-nav-row">
-                  {activeGroup.items.map((sectionId) => {
-                    const section = labSections.find((item) => item.id === sectionId)
-                    if (!section) return null
-                    return (
-                      <button
-                        key={section.id}
-                        type="button"
-                        className={section.id === activeSection ? 'mobile-nav-item mobile-nav-item-active' : 'mobile-nav-item'}
-                        onClick={() => handleSectionChange(section.id)}
-                      >
-                        <span>{section.icon}</span>
-                        <span>{section.shortLabel}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
+          <div className="mobile-header">
+            <button type="button" className="mobile-brand" onClick={() => handleSectionChange('home')}>
+              <span className="brand-kicker">React 19</span>
+              <strong>Feature Lab</strong>
+            </button>
+            <button
+              type="button"
+              className={mobileNavOpen ? 'mobile-menu-button mobile-menu-button-open' : 'mobile-menu-button'}
+              aria-expanded={mobileNavOpen}
+              aria-controls="mobile-navigation"
+              onClick={() => setMobileNavOpen((open) => !open)}
+            >
+              {mobileNavOpen ? '关闭' : '菜单'}
+            </button>
           </div>
+
+          {mobileNavOpen ? <button type="button" className="mobile-nav-backdrop" aria-label="关闭菜单" onClick={() => setMobileNavOpen(false)} /> : null}
+
+          {mobileNavOpen ? (
+            <div id="mobile-navigation" className="mobile-nav-sheet" aria-label="Mobile navigation">
+              <div className="mobile-nav-sheet-head">
+                <p>{activeGroup.title}</p>
+                <strong>{activeMeta.shortLabel}</strong>
+              </div>
+
+              {navGroups.map((group) => (
+                <section key={group.title} className="mobile-nav-group">
+                  <div className="nav-group-head">
+                    <strong>{group.title}</strong>
+                    <p>{group.description}</p>
+                  </div>
+                  <div className="nav-list">
+                    {group.items.map((sectionId) => {
+                      const section = labSections.find((item) => item.id === sectionId)
+                      if (!section) return null
+                      return (
+                        <NavButton
+                          key={section.id}
+                          section={section}
+                          active={section.id === activeSection}
+                          onClick={() => handleSectionChange(section.id)}
+                        />
+                      )
+                    })}
+                  </div>
+                </section>
+              ))}
+            </div>
+          ) : null}
 
           <Suspense fallback={<SectionFallback />}>{renderSection(activeSection, handleSectionChange)}</Suspense>
         </main>

@@ -20,6 +20,7 @@ export function ResourceHintsSection({ onJump }: { onJump?: (sectionId: LabSecti
       eyebrow="代码案例 / 04"
       title="资源编排：性能 hint 也该贴着页面组件写"
       description="这页不会拿 Lighthouse 分数作秀，而是专注讲清楚：资源 hint 最有价值的地方，是让最懂业务优先级的组件自己表达意图。"
+      stackClassName="reference-stack"
       badges={
         <>
           <Badge tone="reference">含 preload / preinit / preconnect</Badge>

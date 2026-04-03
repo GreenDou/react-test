@@ -103,6 +103,7 @@ export function RefSection({ onJump }: { onJump?: (sectionId: LabSectionId) => v
       eyebrow="可直接体验 / 04"
       title="ref as prop：小组件少一层包装，读起来就更像人话"
       description="这不是最重磅的新特性，但它很容易在真实项目里立刻见效：尤其是设计系统和基础表单组件。"
+      stackClassName="feature-stack"
       badges={
         <>
           <Badge tone="demo">可直接 focus / select</Badge>

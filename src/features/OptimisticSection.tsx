@@ -196,6 +196,7 @@ export function OptimisticSection({ onJump }: { onJump?: (sectionId: LabSectionI
       eyebrow="可直接体验 / 02"
       title="useOptimistic：先让界面动起来，但别把真实数据搞脏"
       description="如果你以前做过评论区、点赞、消息发送，你一定知道最烦的不是‘先显示’，而是成功和失败回来以后该怎么收场。useOptimistic 正在处理这件事。"
+      stackClassName="feature-stack"
       badges={
         <>
           <Badge tone="demo">成功 / 失败都可试</Badge>

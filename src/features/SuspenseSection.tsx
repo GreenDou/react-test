@@ -104,6 +104,7 @@ export function SuspenseSection({ onJump }: { onJump?: (sectionId: LabSectionId)
       eyebrow="可直接体验 / 03"
       title="use() + Suspense：不是“在 render 里乱 fetch”，而是“稳定地读资源”"
       description="这一页最容易被讲玄学，所以我特意把重点落在缓存纪律上：use() 真正值钱的前提，是你先把 Promise 生命周期设计对。"
+      stackClassName="feature-stack"
       badges={
         <>
           <Badge tone="demo">可切换缓存 key</Badge>

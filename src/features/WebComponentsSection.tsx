@@ -74,6 +74,7 @@ export function WebComponentsSection({ onJump }: { onJump?: (sectionId: LabSecti
       eyebrow="可直接体验 / 07"
       title="Web Components 互操作：React 19 更像在接组件，不像在搭桥"
       description="这页的重点不是炫技，而是让你真切看到：一个 custom element 也能在 React 里用得更自然。"
+      stackClassName="feature-stack"
       badges={
         <>
           <Badge tone="demo">真实 custom element</Badge>

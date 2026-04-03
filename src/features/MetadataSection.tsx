@@ -88,6 +88,7 @@ export function MetadataSection({ onJump }: { onJump?: (sectionId: LabSectionId)
       eyebrow="可直接体验 / 06"
       title="Document metadata：页面头信息也该回到组件树里"
       description="这一页最适合用一句人话来理解：原本散落在副作用里的 title 和 meta，现在终于能像普通 UI 一样声明。"
+      stackClassName="feature-stack"
       badges={
         <>
           <Badge tone="demo">标签标题实时变化</Badge>

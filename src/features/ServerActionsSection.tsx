@@ -20,6 +20,7 @@ export function ServerActionsSection({ onJump }: { onJump?: (sectionId: LabSecti
       eyebrow="代码案例 / 02"
       title="Server Actions：把 mutation 贴着业务动作写，而不是先造一个 API 外壳"
       description="这页重点不在“神奇地省几行代码”，而在于它让表单、校验、写库、缓存刷新和跳转终于能按业务顺序排在一起。"
+      stackClassName="reference-stack"
       badges={
         <>
           <Badge tone="reference">含 use server 示例</Badge>

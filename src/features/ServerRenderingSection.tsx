@@ -20,6 +20,7 @@ export function ServerRenderingSection({ onJump }: { onJump?: (sectionId: LabSec
       eyebrow="代码案例 / 03"
       title="prerender / stream / resume：别再把所有服务端输出都想成 renderToString"
       description="如果你只记住一件事：React 19 不是给你一个更强的单一 API，而是把不同输出链路拆成了不同工具。"
+      stackClassName="reference-stack"
       badges={
         <>
           <Badge tone="reference">含 prerender / resume / stream</Badge>

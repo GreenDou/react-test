@@ -19,6 +19,8 @@ export function SectionShell({
   description,
   badges,
   actions,
+  shellClassName,
+  stackClassName,
   children,
 }: PropsWithChildren<{
   eyebrow: string
@@ -26,9 +28,11 @@ export function SectionShell({
   description: string
   badges?: ReactNode
   actions?: ReactNode
+  shellClassName?: string
+  stackClassName?: string
 }>) {
   return (
-    <section className="page-shell">
+    <section className={shellClassName ? `page-shell ${shellClassName}` : 'page-shell'}>
       <header className="page-hero">
         <div className="page-hero-main">
           <p className="page-eyebrow">{eyebrow}</p>
@@ -42,7 +46,7 @@ export function SectionShell({
           </div>
         )}
       </header>
-      <div className="page-stack">{children}</div>
+      <div className={stackClassName ? `page-stack ${stackClassName}` : 'page-stack'}>{children}</div>
     </section>
   )
 }
@@ -126,7 +130,7 @@ export function CompareCard({
       <p className="card-eyebrow">{eyebrow}</p>
       <h3>{title}</h3>
       <p className="compare-summary">{summary}</p>
-      <ul className="bullet-list">
+      <ul className="bullet-list compact-list">
         {bullets.map((bullet) => (
           <li key={bullet}>{bullet}</li>
         ))}
@@ -165,8 +169,8 @@ export function ReferenceExplorer({ files }: { files: ReferenceFile[] }) {
     <section className="reference-explorer">
       <aside className="card reference-sidebar">
         <div className="reference-sidebar-head">
-          <h3>文件导航</h3>
-          <p>按文件拆开看，更适合手机和长代码阅读。</p>
+          <h3>代码文件</h3>
+          <p>按文件拆开看，先看职责，再看细节。</p>
         </div>
         <div className="reference-file-list" role="tablist" aria-label="Reference files">
           {files.map((file, index) => (
