@@ -1,5 +1,8 @@
 export type LabSectionId =
   | 'home'
+  | 'playground'
+  | 'reference'
+  | 'map'
   | 'actions'
   | 'optimistic'
   | 'suspense'
@@ -7,9 +10,14 @@ export type LabSectionId =
   | 'context'
   | 'metadata'
   | 'web-components'
-  | 'overview'
+  | 'server-components'
+  | 'server-actions'
+  | 'server-rendering'
+  | 'resource-hints'
+  | 'hydration'
 
-export type StatusTone = 'demo' | 'explain' | 'limit' | 'guide'
+export type StatusTone = 'guide' | 'demo' | 'reference' | 'limit'
+export type SectionCluster = 'guide' | 'interactive' | 'reference'
 
 export interface LabSectionMeta {
   id: LabSectionId
@@ -18,14 +26,23 @@ export interface LabSectionMeta {
   shortLabel: string
   title: string
   description: string
-  status: StatusTone
+  tone: StatusTone
+  cluster: SectionCluster
 }
 
-export interface OverviewItem {
+export interface NavGroup {
+  title: string
+  description: string
+  items: LabSectionId[]
+}
+
+export interface FeatureMapItem {
   name: string
-  status: Exclude<StatusTone, 'guide'>
+  sectionId: LabSectionId
+  runMode: '可直接体验' | '看代码讲解'
+  environment: string
   summary: string
-  note: string
+  whyItMatters: string
 }
 
 export interface CompareCardData {
@@ -34,6 +51,26 @@ export interface CompareCardData {
   summary: string
   bullets: string[]
   code: string
+}
+
+export interface StoryCardItem {
+  title: string
+  body: string
+}
+
+export interface ReferenceFile {
+  label: string
+  path: string
+  summary?: string
+  code: string
+}
+
+export interface ReferenceCase {
+  title: string
+  summary: string
+  environment: string
+  whyNotOnPages: string
+  files: ReferenceFile[]
 }
 
 export interface SignupResult {

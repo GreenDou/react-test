@@ -43,6 +43,12 @@ a {
   color: inherit;
 }
 
+p,
+ul,
+ol {
+  margin-top: 0;
+}
+
 #root {
   min-height: 100vh;
 }

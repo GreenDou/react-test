@@ -1,35 +1,39 @@
 import { forwardRef, useRef } from 'react'
-import type { ComponentPropsWithoutRef, ForwardedRef } from 'react'
-import { Badge, CompareCard, DemoPanel, InfoCard, SectionShell } from '../components/ui'
-import type { CompareCardData } from '../types'
+import type { ComponentPropsWithoutRef, ForwardedRef, Ref } from 'react'
+import { Badge, CompareCard, DemoPanel, InfoCard, SectionDivider, SectionShell, StoryGrid } from '../components/ui'
+import type { CompareCardData, StoryCardItem, LabSectionId } from '../types'
+
+const story: StoryCardItem[] = [
+  { title: '一句话理解', body: '很多简单函数组件现在可以像接普通 prop 一样接收 ref，不必默认先包一层 forwardRef。' },
+  { title: '它解决的真实问题', body: '设计系统里有大量 Input、Button、SearchField 之类的基础组件，它们经常只是想把 ref 透传下去，却要为此额外包壳。' },
+  { title: '旧写法为什么麻烦', body: '不是说 forwardRef 难，而是简单场景也得多一层包装，组件定义和类型声明都更绕。' },
+  { title: 'React 19 写法为什么更顺', body: 'ref 终于没那么“特殊”了。对很多基础组件来说，定义方式更接近日常 props。' },
+  { title: '看这个 demo 时该注意什么', body: '左右两个输入框都能被 focus / select，区别只在于组件定义本身是不是还要额外包一层。' },
+  { title: '什么时候该用 / 不该用', body: '简单透传 ref 的组件很适合；但如果你要兼容旧生态、明确表达 ref 边界，或者配合 useImperativeHandle，forwardRef 仍然合理。' },
+  { title: '稍微深入一点的原理', body: '这更像一次“语义去特殊化”：很多 ref 场景不再需要额外 ceremony，但并不代表 forwardRef 被废弃。' },
+]
 
 const legacyCard: CompareCardData = {
-  eyebrow: '传统写法',
-  title: 'forwardRef 包一层壳',
-  summary: '过去函数组件要接收 ref，往往得把组件再包一层 forwardRef。写法没错，但包装层确实多。',
-  bullets: [
-    '需要额外的 forwardRef 包装。',
-    '有些组件还会顺带暴露 useImperativeHandle。',
-    '对简单输入框、按钮包装来说，仪式感偏重。',
-  ],
-  code: `const SearchInput = forwardRef(function SearchInput(props, ref) {\n  return <input ref={ref} {...props} />\n})`,
+  eyebrow: '旧写法',
+  title: 'forwardRef 包一层',
+  summary: '这是 React 很长时间的标准做法，完全没错。',
+  bullets: ['定义更像“包装器组件”。', '类型和实现都多一层。', '复杂场景依然很有用。'],
+  code: `const SearchInput = forwardRef(function SearchInput(props, ref) {
+  return <input ref={ref} {...props} />
+})`,
 }
 
 const modernCard: CompareCardData = {
-  eyebrow: 'React 19 写法',
-  title: 'ref 像普通 prop 一样接收',
-  summary: '在很多简单组件里，ref 终于不再特殊得非要 forwardRef 才能经过函数组件。',
-  bullets: [
-    '少一层包装，组件定义更贴近日常 prop 心智。',
-    '对 design system 的基础输入组件很友好。',
-    '不是 forwardRef 被废弃，而是很多简单场景不必再用它。',
-  ],
-  code: `function SearchInput({ ref, ...props }) {\n  return <input ref={ref} {...props} />\n}`,
+  eyebrow: 'React 19',
+  title: 'ref 直接作为 prop 接收',
+  summary: '对简单组件最舒服。',
+  bullets: ['基础组件更轻。', '定义更接近普通 props。', '读代码的人一眼就能懂。'],
+  code: `function SearchInput({ ref, ...props }) {
+  return <input ref={ref} {...props} />
+}`,
 }
 
-type LegacyInputProps = ComponentPropsWithoutRef<'input'> & {
-  label: string
-}
+type LegacyInputProps = ComponentPropsWithoutRef<'input'> & { label: string }
 
 const LegacyInput = forwardRef(function LegacyInput(
   { label, ...props }: LegacyInputProps,
@@ -45,7 +49,7 @@ const LegacyInput = forwardRef(function LegacyInput(
 
 type ModernInputProps = ComponentPropsWithoutRef<'input'> & {
   label: string
-  ref?: React.Ref<HTMLInputElement>
+  ref?: Ref<HTMLInputElement>
 }
 
 function ModernInput({ label, ref, ...props }: ModernInputProps) {
@@ -62,79 +66,64 @@ function RefPlayground() {
   const modernRef = useRef<HTMLInputElement>(null)
 
   return (
-    <div className="content-grid two-column">
-      <div className="stack-gap">
-        <LegacyInput ref={legacyRef} label="forwardRef 输入框" defaultValue="legacy ref" />
-        <div className="control-row">
-          <button type="button" className="secondary-button" onClick={() => legacyRef.current?.focus()}>
-            focus
-          </button>
-          <button type="button" className="secondary-button" onClick={() => legacyRef.current?.select()}>
-            select
-          </button>
+    <div className="grid-two">
+      <InfoCard title="forwardRef 版本" eyebrow="旧写法">
+        <div className="stack-gap">
+          <LegacyInput ref={legacyRef} label="旧写法输入框" defaultValue="legacy ref" />
+          <div className="control-row">
+            <button type="button" className="secondary-button" onClick={() => legacyRef.current?.focus()}>
+              focus
+            </button>
+            <button type="button" className="secondary-button" onClick={() => legacyRef.current?.select()}>
+              select
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="stack-gap">
-        <ModernInput ref={modernRef} label="ref as prop 输入框" defaultValue="modern ref" />
-        <div className="control-row">
-          <button type="button" className="secondary-button" onClick={() => modernRef.current?.focus()}>
-            focus
-          </button>
-          <button type="button" className="secondary-button" onClick={() => modernRef.current?.select()}>
-            select
-          </button>
+      </InfoCard>
+      <InfoCard title="ref as prop 版本" eyebrow="React 19" tone="accent">
+        <div className="stack-gap">
+          <ModernInput ref={modernRef} label="React 19 输入框" defaultValue="modern ref" />
+          <div className="control-row">
+            <button type="button" className="primary-button" onClick={() => modernRef.current?.focus()}>
+              focus
+            </button>
+            <button type="button" className="primary-button" onClick={() => modernRef.current?.select()}>
+              select
+            </button>
+          </div>
         </div>
-      </div>
+      </InfoCard>
     </div>
   )
 }
 
-export function RefSection() {
+export function RefSection({ onJump }: { onJump?: (sectionId: LabSectionId) => void }) {
   return (
     <SectionShell
-      eyebrow="Feature 04"
-      title="ref as prop"
-      description="对简单函数组件来说，React 19 允许 ref 像普通 prop 一样被透传，终于不用每个基础输入框都为 forwardRef 单独包壳。"
+      eyebrow="可直接体验 / 04"
+      title="ref as prop：小组件少一层包装，读起来就更像人话"
+      description="这不是最重磅的新特性，但它很容易在真实项目里立刻见效：尤其是设计系统和基础表单组件。"
       badges={
         <>
-          <Badge tone="demo">forwardRef 对比</Badge>
-          <Badge tone="demo">ref 直接透传</Badge>
+          <Badge tone="demo">可直接 focus / select</Badge>
+          <Badge tone="demo">旧写法对照</Badge>
         </>
       }
+      actions={
+        <button type="button" className="secondary-button" onClick={() => onJump?.('playground')}>
+          返回试玩列表
+        </button>
+      }
     >
+      <StoryGrid items={story} />
+      <DemoPanel title="直接试：两个输入框都能被 ref 控制" description="差别不在功能，而在组件定义是不是还要多一层 forwardRef 包装。">
+        <RefPlayground />
+      </DemoPanel>
+      <SectionDivider title="代码层面对比" description="看这里主要是为了理解：React 19 是在降低基础组件的样板代码。" />
       <div className="compare-grid">
         <CompareCard {...legacyCard} />
         <CompareCard {...modernCard} />
       </div>
-
-      <DemoPanel
-        title="直接试一下 focus / select"
-        description="两个输入框都能被 ref 控制；区别在于现代写法少了一层 forwardRef 包装，定义更接近日常 props。"
-      >
-        <RefPlayground />
-      </DemoPanel>
-
-      <DemoPanel
-        title="什么时候还会继续用 forwardRef"
-        description="React 19 不是把 forwardRef 完全打入冷宫，而是把它从“默认必须”降成“需要时再用”。"
-      >
-        <div className="content-grid two-column">
-          <InfoCard title="仍适合 forwardRef 的场景">
-            <ul className="ordered-list unordered-list">
-              <li>需要和旧代码或第三方库保持兼容。</li>
-              <li>你想显式表达“这是一个转发 ref 的组件边界”。</li>
-              <li>要配合 useImperativeHandle 暴露复杂实例方法。</li>
-            </ul>
-          </InfoCard>
-          <InfoCard title="ref as prop 的直接收益" tone="accent">
-            <ul className="ordered-list unordered-list">
-              <li>基础组件更轻。</li>
-              <li>类型定义更接近普通 props。</li>
-              <li>组件阅读成本更低，尤其在 design system 里很明显。</li>
-            </ul>
-          </InfoCard>
-        </div>
-      </DemoPanel>
     </SectionShell>
   )
 }

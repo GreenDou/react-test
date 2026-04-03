@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState } from 'react'
-import { Badge, CompareCard, DemoPanel, InfoCard, SectionShell } from '../components/ui'
-import type { CompareCardData } from '../types'
+import { Badge, CompareCard, DemoPanel, SectionDivider, SectionShell, StoryGrid } from '../components/ui'
+import type { CompareCardData, StoryCardItem, LabSectionId } from '../types'
 
 const ThemeContext = createContext({
   name: '深色实验舱',
@@ -8,28 +8,34 @@ const ThemeContext = createContext({
   text: '#f8fafc',
 })
 
+const story: StoryCardItem[] = [
+  { title: '一句话理解', body: 'Context provider 写法更短了：从 <Context.Provider> 变成 <Context value={...}>。' },
+  { title: '它解决的真实问题', body: '当页面里套了很多 Provider，JSX 会越来越像仪式现场，可读性持续下降。' },
+  { title: '旧写法为什么麻烦', body: '不是功能麻烦，而是语法噪音大。你每天都在看它，久了就会觉得臃肿。' },
+  { title: 'React 19 写法为什么更顺', body: 'Provider 终于更像一个普通组件。消费端完全不变，主要提升的是代码可读性。' },
+  { title: '看这个 demo 时该注意什么', body: '左右两边消费的是同一个 ThemePreview，变化的只有 provider 写法，不是消费逻辑。' },
+  { title: '什么时候该用 / 不该用', body: '只要是 React 19 项目就直接用简化写法；但别把它误解成性能优化，它解决的是代码表达问题。' },
+  { title: '稍微深入一点的原理', body: '这类变化看起来小，但它会持续改善你每天读 JSX 的体验，尤其是多层 Provider 的应用。' },
+]
+
 const legacyCard: CompareCardData = {
-  eyebrow: '传统写法',
+  eyebrow: '旧写法',
   title: '<Context.Provider value={...}>',
-  summary: '这是 React 开发者最熟悉的 Provider 语法，完全没问题，只是看起来比普通组件更“特殊”。',
-  bullets: [
-    'Provider 是 Context 对象上的一个属性。',
-    '在层级很多时，JSX 噪音偏多。',
-    '消费端 useContext(ThemeContext) 没变化。',
-  ],
-  code: `<ThemeContext.Provider value={theme}>\n  <Toolbar />\n</ThemeContext.Provider>`,
+  summary: '经典、稳定、大家都熟。',
+  bullets: ['消费端不变。', '语法更“特殊”。', '层级深时会有噪音。'],
+  code: `<ThemeContext.Provider value={theme}>
+  <Toolbar />
+</ThemeContext.Provider>`,
 }
 
 const modernCard: CompareCardData = {
-  eyebrow: 'React 19 写法',
+  eyebrow: 'React 19',
   title: '<Context value={...}>',
-  summary: 'Context 自己就能当 provider component 用，Provider 语法因此更接近普通组件。',
-  bullets: [
-    '语法更短，层级更干净。',
-    '消费方式完全不变。',
-    '特别适合主题、密度、语言等基础全局状态。',
-  ],
-  code: `<ThemeContext value={theme}>\n  <Toolbar />\n</ThemeContext>`,
+  summary: '更接近普通组件心智。',
+  bullets: ['更短。', '更顺眼。', '消费方式完全不改。'],
+  code: `<ThemeContext value={theme}>
+  <Toolbar />
+</ThemeContext>`,
 }
 
 function ThemePreview({ title }: { title: string }) {
@@ -44,7 +50,7 @@ function ThemePreview({ title }: { title: string }) {
   )
 }
 
-export function ContextSection() {
+export function ContextSection({ onJump }: { onJump?: (sectionId: LabSectionId) => void }) {
   const [mode, setMode] = useState<'dark' | 'mint'>('dark')
 
   const theme = useMemo(
@@ -57,22 +63,23 @@ export function ContextSection() {
 
   return (
     <SectionShell
-      eyebrow="Feature 05"
-      title="Context provider 简化写法"
-      description="这个变化不算颠覆，但非常实用：Provider 终于更像普通组件了。对于主题、国际化、权限上下文这种天天都在写的代码，阅读噪音会明显下降。"
+      eyebrow="可直接体验 / 05"
+      title="Context provider 简化：变化不大，但每天都更顺眼了"
+      description="这类特性不该被讲成革命，它更像是 React 19 在帮你清理长期积累的语法噪音。"
       badges={
         <>
-          <Badge tone="demo">Provider 语法对比</Badge>
-          <Badge tone="demo">消费端不变</Badge>
+          <Badge tone="demo">同一消费者对比</Badge>
+          <Badge tone="demo">主题切换可视化</Badge>
         </>
       }
+      actions={
+        <button type="button" className="secondary-button" onClick={() => onJump?.('playground')}>
+          返回试玩列表
+        </button>
+      }
     >
-      <div className="compare-grid">
-        <CompareCard {...legacyCard} />
-        <CompareCard {...modernCard} />
-      </div>
-
-      <DemoPanel title="两种 provider 写法，消费结果完全一致" description="切换主题后，左边仍然使用旧 Provider 语法，右边使用 React 19 简化语法；消费者组件 ThemePreview 完全同一份。">
+      <StoryGrid items={story} />
+      <DemoPanel title="直接试：左右只是 provider 写法不同" description="切换主题后你会看到两边效果完全一致，区别只在代码是不是更干净。">
         <div className="stack-gap">
           <div className="control-row">
             <button type="button" className={mode === 'dark' ? 'primary-button' : 'secondary-button'} onClick={() => setMode('dark')}>
@@ -82,7 +89,7 @@ export function ContextSection() {
               薄荷主题
             </button>
           </div>
-          <div className="content-grid two-column">
+          <div className="grid-two">
             <ThemeContext.Provider value={theme}>
               <ThemePreview title="传统 Provider" />
             </ThemeContext.Provider>
@@ -92,25 +99,11 @@ export function ContextSection() {
           </div>
         </div>
       </DemoPanel>
-
-      <DemoPanel title="为什么这件事值得注意" description="它不改变 Context 本质，但会改变你每天看 JSX 的体验。">
-        <div className="content-grid two-column">
-          <InfoCard title="收益偏‘工程体验’">
-            <ul className="ordered-list unordered-list">
-              <li>Provider 套娃时，代码噪音更少。</li>
-              <li>写法更像普通组件，学习门槛更低。</li>
-              <li>Context 对象本身的角色更统一。</li>
-            </ul>
-          </InfoCard>
-          <InfoCard title="不变的部分" tone="accent">
-            <ul className="ordered-list unordered-list">
-              <li>useContext 的使用方式不变。</li>
-              <li>Context 分层、拆分、memo 化策略仍然重要。</li>
-              <li>这不是性能特性，而是语义与可读性优化。</li>
-            </ul>
-          </InfoCard>
-        </div>
-      </DemoPanel>
+      <SectionDivider title="代码层面对比" description="这页重点不是功能差异，而是可读性差异。" />
+      <div className="compare-grid">
+        <CompareCard {...legacyCard} />
+        <CompareCard {...modernCard} />
+      </div>
     </SectionShell>
   )
 }

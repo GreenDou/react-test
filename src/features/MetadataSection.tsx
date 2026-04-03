@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Badge, CompareCard, DemoPanel, InfoCard, SectionShell, StatusLine } from '../components/ui'
-import type { CompareCardData } from '../types'
+import { Badge, CompareCard, DemoPanel, InfoCard, SectionDivider, SectionShell, StatusLine, StoryGrid } from '../components/ui'
+import type { CompareCardData, StoryCardItem, LabSectionId } from '../types'
 
 const metadataModes = [
   {
@@ -11,37 +11,48 @@ const metadataModes = [
   {
     key: 'optimistic',
     title: 'React 19 Lab · Optimistic UI',
-    description: '标题和 description 跟着当前功能视图一起变化。',
+    description: '标题和 description 跟着当前视图一起变化。',
   },
   {
     key: 'elements',
     title: 'React 19 Lab · Custom Elements',
-    description: '自定义元素与 metadata 一样，都是 React 19 提升 DOM 语义的一部分。',
+    description: '自定义元素页也可以直接从组件里声明 metadata。',
   },
 ] as const
 
+const story: StoryCardItem[] = [
+  { title: '一句话理解', body: '现在 <title> 和 <meta> 也能像普通 UI 一样从组件里声明出来。' },
+  { title: '它解决的真实问题', body: '以前 document.title、description meta 往往散落在 useEffect 里，页面一复杂就难维护。' },
+  { title: '旧写法为什么麻烦', body: '要 query DOM、setAttribute、管覆盖顺序，还常常和路由切换耦合在一起。' },
+  { title: 'React 19 写法为什么更顺', body: '头信息终于回到组件树里，状态一变，head 也跟着变。你不再需要把它当成 DOM 副作用单独维护。' },
+  { title: '看这个 demo 时该注意什么', body: '一边切换当前视图，一边留意浏览器标签标题和右侧读取出来的 document.head 当前值。' },
+  { title: '什么时候该用 / 不该用', body: '几乎所有页面级信息都适合这样声明；但如果是运行时埋点，不属于 metadata，就别混在一起。' },
+  { title: '稍微深入一点的原理', body: '这件事在 SSR / streaming 里更有价值，因为服务端输出 head 时就能更自然地和组件树保持一致。' },
+]
+
 const legacyCard: CompareCardData = {
-  eyebrow: '传统写法',
+  eyebrow: '旧写法',
   title: 'useEffect 里手动改 document.title',
-  summary: '以前最常见的做法是：组件挂载后自己去写 document.title，meta 还得额外 query / create / patch。',
-  bullets: [
-    'title、meta、link 往往散落在多个 useEffect。',
-    '切换路由、嵌套组件时需要自己管覆盖顺序。',
-    '更像 imperative DOM patch，而不是组件输出。',
-  ],
-  code: `useEffect(() => {\n  document.title = title\n  const meta = document.querySelector('meta[name="description"]')\n  meta?.setAttribute('content', description)\n}, [title, description])`,
+  summary: '能做，但像是在补 DOM，而不是声明 UI。',
+  bullets: ['标题和 meta 容易分散在多个 effect。', '覆盖顺序要自己想。', '读代码时不容易一眼看出页面头信息。'],
+  code: `useEffect(() => {
+  document.title = title
+  const meta = document.querySelector('meta[name="description"]')
+  meta?.setAttribute('content', description)
+}, [title, description])`,
 }
 
 const modernCard: CompareCardData = {
-  eyebrow: 'React 19 写法',
-  title: '组件直接 render <title> / <meta>',
-  summary: '把页面头信息也纳入组件声明式输出。你切换视图时，head 会跟着组件树一起变化。',
-  bullets: [
-    '更符合“UI = state 的映射”。',
-    '多层组件都能声明 metadata，React 负责收敛。',
-    '对路由页面、嵌套路由、局部功能页尤其舒服。',
-  ],
-  code: `return (\n  <>\n    <title>{title}</title>\n    <meta name="description" content={description} />\n  </>\n)`,
+  eyebrow: 'React 19',
+  title: '组件里直接 render <title> / <meta>',
+  summary: '终于更像声明式 UI 了。',
+  bullets: ['页面状态和 head 信息同源。', '更适合页面级组件。', 'SSR 场景收益尤其明显。'],
+  code: `return (
+  <>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+  </>
+)`,
 }
 
 function MetadataPreview({ title, description }: { title: string; description: string }) {
@@ -53,7 +64,7 @@ function MetadataPreview({ title, description }: { title: string; description: s
   )
 }
 
-export function MetadataSection() {
+export function MetadataSection({ onJump }: { onJump?: (sectionId: LabSectionId) => void }) {
   const [activeKey, setActiveKey] = useState<(typeof metadataModes)[number]['key']>('lab')
   const [liveTitle, setLiveTitle] = useState('')
   const [liveDescription, setLiveDescription] = useState('')
@@ -74,24 +85,24 @@ export function MetadataSection() {
 
   return (
     <SectionShell
-      eyebrow="Feature 06"
-      title="Document metadata"
-      description="React 19 把 head 信息也带回了声明式世界。这个 demo 直接在组件里输出 <title> 和 <meta name=description>，然后实时把 document.head 当前值读出来。"
+      eyebrow="可直接体验 / 06"
+      title="Document metadata：页面头信息也该回到组件树里"
+      description="这一页最适合用一句人话来理解：原本散落在副作用里的 title 和 meta，现在终于能像普通 UI 一样声明。"
       badges={
         <>
-          <Badge tone="demo">title / meta 即时变化</Badge>
-          <Badge tone="demo">组件声明式 metadata</Badge>
+          <Badge tone="demo">标签标题实时变化</Badge>
+          <Badge tone="demo">head 内容同步读出</Badge>
         </>
+      }
+      actions={
+        <button type="button" className="secondary-button" onClick={() => onJump?.('playground')}>
+          返回试玩列表
+        </button>
       }
     >
       <MetadataPreview title={current.title} description={current.description} />
-
-      <div className="compare-grid">
-        <CompareCard {...legacyCard} />
-        <CompareCard {...modernCard} />
-      </div>
-
-      <DemoPanel title="切换当前视图的 metadata" description="按钮切换的是组件状态，但最终变化体现在 document.head 里。你可以顺便看看浏览器标签标题是否跟着变化。">
+      <StoryGrid items={story} />
+      <DemoPanel title="直接试：切换视图，看 head 怎么跟着变" description="别只看页面里的文字，顺便看看浏览器标签标题和右侧实时读取出的 document.head。">
         <div className="stack-gap">
           <div className="control-row wrap-row">
             {metadataModes.map((mode) => (
@@ -105,23 +116,28 @@ export function MetadataSection() {
               </button>
             ))}
           </div>
-          <div className="content-grid two-column">
+          <div className="grid-two">
             <InfoCard title="当前 document.head 实况" tone="accent">
               <div className="stack-gap">
                 <StatusLine label="document.title" value={liveTitle} />
                 <StatusLine label="meta[name=description]" value={liveDescription} />
               </div>
             </InfoCard>
-            <InfoCard title="为什么这事很实用">
-              <ul className="ordered-list unordered-list">
-                <li>路由页面切换时不必每页手写副作用。</li>
-                <li>metadata 终于和组件树同源，覆盖关系更可控。</li>
-                <li>在 SSR / streaming 场景里收益更明显；静态页也能先学这套声明方式。</li>
+            <InfoCard title="这页最值得记住的点">
+              <ul className="bullet-list">
+                <li>状态变化会自然带动 head 变化。</li>
+                <li>再也不必把 title 当成“挂载后顺手补一下的副作用”。</li>
+                <li>在 SSR / 路由场景里，这种声明式写法尤其省心。</li>
               </ul>
             </InfoCard>
           </div>
         </div>
       </DemoPanel>
+      <SectionDivider title="代码层面对比" description="看这里主要是为了理解：metadata 不再是零散副作用。" />
+      <div className="compare-grid">
+        <CompareCard {...legacyCard} />
+        <CompareCard {...modernCard} />
+      </div>
     </SectionShell>
   )
 }

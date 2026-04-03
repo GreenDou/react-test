@@ -1,50 +1,50 @@
-import { overviewItems } from '../data/catalog'
-import { Badge, InfoCard, SectionShell } from '../components/ui'
+import { featureMapItems } from '../data/catalog'
+import { Badge, InfoCard, JumpCard, SectionDivider, SectionShell } from '../components/ui'
+import type { LabSectionId } from '../types'
 
-const toneLabelMap = {
-  demo: '已做交互 demo',
-  explain: '仅原理说明',
-  limit: '不适合纯静态 Pages',
-} as const
-
-export function OverviewSection() {
+export function OverviewSection({ onJump }: { onJump: (sectionId: LabSectionId) => void }) {
   return (
     <SectionShell
-      eyebrow="全量关注点"
-      title="React 19 值得关注的发布点"
-      description="这里把本项目覆盖的点和没覆盖到的点都摊开说。对于 GitHub Pages 这种纯静态宿主，真正能完整演示的是客户端新 API；凡是需要服务器运行时的能力，都应该单独标明边界。"
+      eyebrow="完整特性地图"
+      title="最后用一张图，把 React 19 这次到底该关注什么讲清楚"
+      description="这张地图的重点不是‘列全’，而是把运行方式一起列全：哪些是纯静态 Pages 也能演的，哪些应该看代码，哪些又更适合在 SSR / 服务端框架里理解。"
       badges={
         <>
-          <Badge tone="demo">已做交互 demo</Badge>
-          <Badge tone="explain">仅原理说明</Badge>
-          <Badge tone="limit">静态环境受限</Badge>
+          <Badge tone="demo">可直接体验</Badge>
+          <Badge tone="reference">看代码讲解</Badge>
         </>
       }
     >
-      <div className="overview-list">
-        {overviewItems.map((item) => (
-          <article key={item.name} className="overview-item">
-            <div className="overview-item-header">
-              <h3>{item.name}</h3>
-              <Badge tone={item.status}>{toneLabelMap[item.status]}</Badge>
-            </div>
-            <p className="overview-summary">{item.summary}</p>
-            <p className="overview-note">{item.note}</p>
-          </article>
-        ))}
+      <div className="grid-two">
+        <InfoCard title="怎么读这张地图" tone="accent">
+          <ol className="ordered-list">
+            <li>先看 run mode：它告诉你当前站里是“可玩”还是“可看代码”。</li>
+            <li>再看 environment：它告诉你真正落地时需要什么宿主。</li>
+            <li>最后点进对应页面，看详细解释或 demo。</li>
+          </ol>
+        </InfoCard>
+        <InfoCard title="一眼记住的边界" tone="soft">
+          <ul className="bullet-list">
+            <li>纯客户端能力：这里就能跑。</li>
+            <li>服务端 / SSR 能力：这里给你真代码，但不伪装成在线 demo。</li>
+            <li>React 19 的价值不只是一批 hooks，而是把客户端与服务端的职责划分得更清楚。</li>
+          </ul>
+        </InfoCard>
       </div>
 
-      <div className="content-grid two-column">
-        <InfoCard title="哪些最适合在静态页学？" tone="soft">
-          <p>
-            最适合做 playground 的，是 <strong>表单动作</strong>、<strong>乐观更新</strong>、<strong>Suspense + use()</strong>、<strong>ref / Context / metadata / custom elements</strong> 这类纯客户端语义升级。它们不需要后端配合，就能准确体现 React 19 的 API 变化。
-          </p>
-        </InfoCard>
-        <InfoCard title="哪些必须区分‘能讲’和‘能跑’？" tone="accent">
-          <p>
-            Server Components、Server Actions、streaming / static prerender / resume 这一组，必须有 Node / Edge / 框架 runtime 才能成立。纯静态站点可以介绍理念，但不能假装真实执行。
-          </p>
-        </InfoCard>
+      <SectionDivider title="特性总览" description="点击任一条都可以继续深入。" />
+
+      <div className="map-list">
+        {featureMapItems.map((item) => (
+          <JumpCard
+            key={item.name}
+            title={item.name}
+            summary={item.summary}
+            meta={`${item.runMode} · ${item.environment} · ${item.whyItMatters}`}
+            badge={<Badge tone={item.runMode === '可直接体验' ? 'demo' : 'reference'}>{item.runMode}</Badge>}
+            onClick={() => onJump(item.sectionId)}
+          />
+        ))}
       </div>
     </SectionShell>
   )
