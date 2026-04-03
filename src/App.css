@@ -640,6 +640,16 @@ textarea {
   align-items: center;
 }
 
+.section-loading-shell {
+  min-height: 70vh;
+}
+
+.section-loading-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 @media (max-width: 1080px) {
   .app-shell {
     grid-template-columns: 1fr;

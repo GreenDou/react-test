@@ -1,17 +1,36 @@
-import { useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { labSections } from './data/catalog'
 import type { LabSectionId } from './types'
-import { HomeSection } from './features/HomeSection'
-import { ActionsSection } from './features/ActionsSection'
-import { OptimisticSection } from './features/OptimisticSection'
-import { SuspenseSection } from './features/SuspenseSection'
-import { RefSection } from './features/RefSection'
-import { ContextSection } from './features/ContextSection'
-import { MetadataSection } from './features/MetadataSection'
-import { WebComponentsSection } from './features/WebComponentsSection'
-import { OverviewSection } from './features/OverviewSection'
 import { Badge } from './components/ui'
+
+const HomeSection = lazy(() => import('./features/HomeSection').then((module) => ({ default: module.HomeSection })))
+const ActionsSection = lazy(() => import('./features/ActionsSection').then((module) => ({ default: module.ActionsSection })))
+const OptimisticSection = lazy(() =>
+  import('./features/OptimisticSection').then((module) => ({ default: module.OptimisticSection })),
+)
+const SuspenseSection = lazy(() => import('./features/SuspenseSection').then((module) => ({ default: module.SuspenseSection })))
+const RefSection = lazy(() => import('./features/RefSection').then((module) => ({ default: module.RefSection })))
+const ContextSection = lazy(() => import('./features/ContextSection').then((module) => ({ default: module.ContextSection })))
+const MetadataSection = lazy(() => import('./features/MetadataSection').then((module) => ({ default: module.MetadataSection })))
+const WebComponentsSection = lazy(() =>
+  import('./features/WebComponentsSection').then((module) => ({ default: module.WebComponentsSection })),
+)
+const OverviewSection = lazy(() => import('./features/OverviewSection').then((module) => ({ default: module.OverviewSection })))
+
+const sectionIds = new Set<LabSectionId>(labSections.map((section) => section.id))
+
+function normalizeSectionId(sectionId?: string | null): LabSectionId {
+  return sectionId && sectionIds.has(sectionId as LabSectionId) ? (sectionId as LabSectionId) : 'home'
+}
+
+function readSectionFromHash(): LabSectionId {
+  if (typeof window === 'undefined') {
+    return 'home'
+  }
+
+  return normalizeSectionId(window.location.hash.replace(/^#/, ''))
+}
 
 function renderSection(activeSection: LabSectionId, onJump: (sectionId: LabSectionId) => void) {
   switch (activeSection) {
@@ -38,8 +57,64 @@ function renderSection(activeSection: LabSectionId, onJump: (sectionId: LabSecti
   }
 }
 
+function SectionFallback() {
+  return (
+    <section className="section-shell section-loading-shell">
+      <div className="section-header">
+        <p className="section-eyebrow">Loading section</p>
+        <h1>正在加载这个特性 demo…</h1>
+        <p className="section-description">已改为按需加载，这样首屏更轻，也更适合后续继续往里加更多 React 19 实验。</p>
+      </div>
+      <div className="content-grid two-column">
+        <div className="demo-panel section-loading-card">
+          <div className="loading-line loading-line-lg"></div>
+          <div className="loading-line"></div>
+          <div className="loading-line"></div>
+          <div className="loading-line loading-line-sm"></div>
+        </div>
+        <div className="demo-panel section-loading-card">
+          <div className="loading-line loading-line-lg"></div>
+          <div className="loading-line"></div>
+          <div className="loading-line"></div>
+          <div className="loading-line loading-line-sm"></div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function App() {
-  const [activeSection, setActiveSection] = useState<LabSectionId>('home')
+  const [activeSection, setActiveSection] = useState<LabSectionId>(() => readSectionFromHash())
+
+  useEffect(() => {
+    const syncSectionFromLocation = () => {
+      setActiveSection(readSectionFromHash())
+    }
+
+    window.addEventListener('hashchange', syncSectionFromLocation)
+    window.addEventListener('popstate', syncSectionFromLocation)
+
+    return () => {
+      window.removeEventListener('hashchange', syncSectionFromLocation)
+      window.removeEventListener('popstate', syncSectionFromLocation)
+    }
+  }, [])
+
+  const handleSectionChange = (sectionId: LabSectionId) => {
+    setActiveSection(sectionId)
+
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const nextUrl =
+      sectionId === 'home'
+        ? `${window.location.pathname}${window.location.search}`
+        : `${window.location.pathname}${window.location.search}#${sectionId}`
+
+    window.history.pushState(null, '', nextUrl)
+  }
+
   const activeMeta = useMemo(
     () => labSections.find((section) => section.id === activeSection) ?? labSections[0],
     [activeSection],
@@ -76,7 +151,7 @@ function App() {
                 key={section.id}
                 type="button"
                 className={section.id === activeSection ? 'nav-item nav-item-active' : 'nav-item'}
-                onClick={() => setActiveSection(section.id)}
+                onClick={() => handleSectionChange(section.id)}
               >
                 <span className="nav-icon">{section.icon}</span>
                 <span>
@@ -101,14 +176,14 @@ function App() {
                 key={section.id}
                 type="button"
                 className={section.id === activeSection ? 'top-nav-item top-nav-item-active' : 'top-nav-item'}
-                onClick={() => setActiveSection(section.id)}
+                onClick={() => handleSectionChange(section.id)}
               >
                 <span>{section.icon}</span>
                 <span>{section.shortLabel}</span>
               </button>
             ))}
           </div>
-          {renderSection(activeSection, setActiveSection)}
+          <Suspense fallback={<SectionFallback />}>{renderSection(activeSection, handleSectionChange)}</Suspense>
         </main>
       </div>
     </>
